@@ -77,7 +77,6 @@ _(Optional: If you wish to use the previous Command-Line Interface (CLI) version
 
 ## Future Enhancements (Beyond MVP)
 
-- **Deployment to Streamlit Community Cloud:** Making the application accessible online for easier sharing and use.
 - More sophisticated text chunking/summarization strategies for extremely long judgments.
 - Adding a feature to define specific legal terms found in the judgment.
 - Implementing user authentication and database to store processed judgments.
