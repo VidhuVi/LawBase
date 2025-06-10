@@ -1,0 +1,39 @@
+Here is the information extracted from the provided Supreme Court judgment:
+
+**Case Name:**
+Deen Dayal Tiwari vs. State of Uttar Pradesh
+
+**Citation:**
+2025 INSC 111
+
+**Court & Date:**
+Supreme Court of India, January 16, 2025
+
+**Judges:**
+Vikram Nath, Sanjay Karol, Sandeep Mehta
+
+**Facts:**
+Deen Dayal Tiwari was convicted of murdering his wife and four minor daughters. The incident occurred in their house in Uttar Pradesh. Neighbors heard cries and found the house locked. Tiwari emerged with a blood-stained axe before being apprehended by police inside the room with the bodies.
+
+**Issue(s):**
+1. Whether the prosecution established beyond reasonable doubt that the Appellant is guilty of the offence punishable under Section 302 of the Indian Penal Code, 1860.
+2. Whether the present case falls under the rarest of rare category so as to warrant the imposition of the death penalty.
+
+**Holding:**
+The Supreme Court upheld the conviction of Deen Dayal Tiwari under Section 302 IPC. However, the death sentence was commuted to life imprisonment until his last breath.
+
+**Reasoning (Ratio Decidendi):**
+The court reasoned that the chain of circumstantial evidence pointed towards the appellant's guilt, including his presence at the scene with a blood-stained axe, the location of the bodies within his residence, and his inability to provide a plausible explanation. However, considering mitigating factors such as the lack of prior criminal history and reports suggesting the possibility of reformation, the court found that the case did not meet the "rarest of rare" threshold required for capital punishment.
+
+**Relevant Statutes/Principles:**
+*   Section 302 of the Indian Penal Code, 1860
+*   Indian Evidence Act, 1872 (Sections 25, 26 & 106)
+*   Code of Criminal Procedure (Section 313)
+*   Article 136 of the Constitution of India
+*   Bachan Singh v. State of Punjab (1980) 2 SCC 684
+*   Machhi Singh v. State of Punjab, (1983) 3 SCC 470
+*   Manoj & Ors. v. State of Madhya Pradesh 2022 SCC OnLine SC 677
+*   State of Uttar Pradesh v. Krishna Master & Ors., (2010) 12 SCC 324
+*   Prakash Dhawal Khairnar (Patil) v. State of Maharashtra , (2002) 2 SCC 35
+*   Swamy Shraddananda v. State of Karnataka, (2008) 13 SCC 767
+*   Union of India v. V. Sriharan (2016) 7 SCC 1
