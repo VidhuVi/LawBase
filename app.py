@@ -89,7 +89,7 @@ def extract_key_info(text):
     prompt = f"""
     This document may be a truncated version of a long Indian Supreme Court judgment.
     Prioritize extracting the most critical legal information from the available text.
-    
+
     Extract the following specific information from the Indian Supreme Court judgment below.
     Present the output clearly, using the headings provided. If a piece of information is not found,
     state "Not found" for that specific field.
@@ -107,7 +107,7 @@ def extract_key_info(text):
     [List the names of the judges who authored or concurred with the judgment]
 
     **Facts:**
-    [Summarize the most relevant facts that led to the legal dispute, concise, around 40-60 words]
+    [Summarize the most relevant facts that led to the legal dispute, concise, around 40-60 words]. **Explicitly identify and label any direct evidence (e.g., eyewitness testimony, documents) and circumstantial evidence (e.g., motive, opportunity, forensic clues) if present and relevant.**
 
     **Jurisdictional Basis**
     [State the specific legal provision or source of power that allows the court to hear the case such as articles/sections of the Constitution, specific statutes, etc.]
