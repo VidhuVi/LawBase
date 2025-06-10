@@ -4,6 +4,10 @@
 
 This project is a Minimum Viable Product (MVP) for an AI agent designed to assist Indian law students in their legal research and case analysis. It automates the process of extracting text from PDF judgments, summarizing them, and pulling out key information for case briefing, presented through a simple web interface.
 
+**[Link to your deployed Streamlit app URL here]**
+(e.g., `https://law-sahayi.streamlit.app/`)
+
+**Note:** This application runs on Streamlit Community Cloud and uses a free api key, don't abuse it. The Google Gemini API key is securely handled as a Streamlit secret and is not exposed in the public codebase.
 ## Features
 
 - **PDF Text Extraction:** Extracts searchable text from uploaded Indian Supreme Court judgment PDFs.
