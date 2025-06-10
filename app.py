@@ -40,6 +40,46 @@ def extract_text_from_pdf(uploaded_file):
         text = "" # Return empty string on error
     return text
 
+# --- Gemini API Function for Judgment Classification ---
+def is_indian_supreme_court_judgment(text):
+    """
+    Uses the Gemini API to determine if the given text is an Indian Supreme Court judgment.
+    Returns True if it is, False otherwise.
+    """
+    if not text:
+        return False # No text means it's not a judgment
+
+    # Take a snippet of the text to save tokens for the classification
+    # The beginning of legal documents usually contains identifying information
+    text_snippet = text[:1000] # Use the first 1000 characters for classification
+
+    prompt = f"""
+    Analyze the following document text. Is this document an official judgment from the Supreme Court of India?
+    Look for characteristic features like case names (e.g., "Appellant v. Respondent"), citations, names of judges, legal terminology common in Indian judgments, and the overall structure.
+
+    Respond with ONLY "YES" if it is an Indian Supreme Court judgment, and ONLY "NO" if it is not.
+    Do not add any other text, explanation, or punctuation.
+
+    Document Text:
+    {text_snippet}
+    """
+
+    try:
+        response = MODEL.generate_content(prompt)
+        # Clean the response to ensure robust parsing
+        clean_response = response.text.strip().upper()
+
+        if "YES" in clean_response:
+            return True
+        elif "NO" in clean_response:
+            return False
+        else:
+            # Fallback for unexpected AI responses
+            print(f"Unexpected AI response for judgment check: {clean_response}")
+            return False # Default to false for safety if unexpected response
+    except Exception as e:
+        print(f"Error checking if document is judgment: {e}")
+        return False # Return False on API error
 
 # --- Gemini API Function for Summarization ---
 def summarize_judgment(text):
@@ -143,19 +183,35 @@ st.markdown("Upload an Indian Supreme Court judgment PDF to get a summary and ke
 
 uploaded_file = st.file_uploader("Choose a PDF judgment file", type="pdf")
 
+
 if uploaded_file is not None:
     file_details = {"FileName": uploaded_file.name, "FileType": uploaded_file.type, "FileSize": uploaded_file.size}
     st.write(file_details)
 
     # Process button
     if st.button("Process Judgment"):
-        with st.spinner("Extracting text and analyzing judgment... This may take a moment."):
+        with st.spinner("Extracting text..."):
             extracted_text = extract_text_from_pdf(uploaded_file)
 
-            if extracted_text:
-                # Limit text length to avoid API token limits for very large judgments
-                # Gemini Pro has a context window of 32K tokens (~40000 characters is a safe rough estimate)
-                processed_text = extracted_text[:40000]
+        if extracted_text:
+            with st.spinner("Verifying document type..."):
+                is_judgment = is_indian_supreme_court_judgment(extracted_text)
+
+            if not is_judgment:
+                st.error("This document does not appear to be an official judgment from the Supreme Court of India. Please upload a valid judgment PDF.")
+                st.stop() # Stop further processing if it's not a judgment
+            
+            # --- Continue with existing processing ONLY if it is a judgment ---
+            with st.spinner("Analyzing judgment and generating output... This may take a moment."):
+                full_text_length = len(extracted_text)
+                processed_text_length = 40000 # Your defined limit
+
+                processed_text = extracted_text[:processed_text_length]
+
+                if full_text_length > processed_text_length:
+                    st.warning(f"**Note:** The judgment is very long ({full_text_length} characters). "
+                               f"Only the first {processed_text_length} characters are being processed to fit API limits. "
+                               "Some information from the latter parts of the judgment may be missed.")
 
                 st.subheader("Summary")
                 summary = summarize_judgment(processed_text)
@@ -163,7 +219,7 @@ if uploaded_file is not None:
 
                 st.subheader("Key Information")
                 key_info = extract_key_info(processed_text)
-                st.markdown(key_info) # Use markdown for better formatting from AI output
+                st.markdown(key_info)
 
-            else:
-                st.error("Could not process the PDF. Please try another file.")
+        else:
+            st.error("Could not extract text from the PDF. Please try another file.")
