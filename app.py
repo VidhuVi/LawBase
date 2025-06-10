@@ -107,7 +107,7 @@ def extract_key_info(text):
     [List the names of the judges who authored or concurred with the judgment]
 
     **Facts:**
-    [Summarize the most relevant facts that led to the legal dispute, concise, around 40-60 words]. **Explicitly identify and label any direct evidence (e.g., eyewitness testimony, documents) and circumstantial evidence (e.g., motive, opportunity, forensic clues) if present and relevant.**
+    [Summarize the most relevant facts that led to the legal dispute, concise, around 40-60 words]. **Explicitly identify and label any direct evidence (e.g., eyewitness testimony, documents), circumstantial evidence (e.g., motive, opportunity, forensic clues) and other types of evidence (e.g., expert testimony, physical evidence), if present and relevant.**
 
     **Jurisdictional Basis**
     [State the specific legal provision or source of power that allows the court to hear the case such as articles/sections of the Constitution, specific statutes, etc.]
