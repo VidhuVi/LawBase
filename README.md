@@ -70,7 +70,7 @@ Benefit: Enables deeper legal research and case comparison.
 Enhancement: Create a web app, VS Code plugin, or a browser extension where users can drag-and-drop PDFs.
 Benefit: Improves usability and real-world application.
 
--OCR and Low-quality PDF Handling
+- OCR and Low-quality PDF Handling
 Enhancement: Use OCR (Tesseract or Amazon Textract) to extract text from scanned PDFs with tables or signatures.
 Benefit: Increases compatibility with court-uploaded or historic PDFs
 
