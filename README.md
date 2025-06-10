@@ -62,7 +62,17 @@ Summaries and extracted key information will be saved as `.txt` files in the `ou
 
 ## Future Enhancements (Beyond MVP)
 
-- [Think of 1-2 ideas, e.g., a simple web interface, integration with legal databases, more advanced NLP for specific legal entities]
+- Cross-reference Similar Cases
+Enhancement: Suggest similar or cited judgments using embedding-based similarity (e.g., FAISS + sentence transformers).
+Benefit: Enables deeper legal research and case comparison.
+
+- Web or Plugin Integration
+Enhancement: Create a web app, VS Code plugin, or a browser extension where users can drag-and-drop PDFs.
+Benefit: Improves usability and real-world application.
+
+-OCR and Low-quality PDF Handling
+Enhancement: Use OCR (Tesseract or Amazon Textract) to extract text from scanned PDFs with tables or signatures.
+Benefit: Increases compatibility with court-uploaded or historic PDFs
 
 ## Contact
 
