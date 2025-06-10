@@ -2,15 +2,15 @@
 
 ## Project Overview
 
-This project is a Minimum Viable Product (MVP) for an AI agent designed to assist Indian law students in their legal research and case analysis. It automates the process of extracting text from PDF judgments, summarizing them, and pulling out key information for case briefing.
+This project is a Minimum Viable Product (MVP) for an AI agent designed to assist Indian law students in their legal research and case analysis. It automates the process of extracting text from PDF judgments, summarizing them, and pulling out key information for case briefing, presented through a simple web interface.
 
 ## Features
 
-- **PDF Text Extraction:** Extracts searchable text from Indian Supreme Court judgment PDFs.
+- **PDF Text Extraction:** Extracts searchable text from uploaded Indian Supreme Court judgment PDFs.
 - **Judgment Summarization:** Generates concise, educational summaries tailored for law students, focusing on facts, issues, reasoning (ratio decidendi), and decisions.
 - **Key Information Extraction:** Extracts structured data points like Case Name, Citation, Judges, Facts, Issue(s), Holding, Reasoning, and Relevant Statutes/Principles.
-- **Command-Line Interface (CLI):** Allows users to process individual judgment files or all judgments in a designated folder.
-- **Output Saving:** Saves generated summaries and key information to dedicated text files for easy review and record-keeping.
+- **Web User Interface (UI):** A user-friendly interface built with Streamlit allows for easy file uploads and direct display of processed results.
+- **Robustness:** Includes basic handling for potentially very long judgments by processing a truncated portion and notifying the user.
 
 ## Setup and Installation
 
@@ -24,8 +24,19 @@ This project is a Minimum Viable Product (MVP) for an AI agent designed to assis
     Navigate to the project root directory (`legal_ai_mvp`) in your terminal and run:
 
     ```bash
-    pip install google-generativeai python-dotenv pypdf
+    pip install -r requirements.txt
     ```
+
+    (Make sure your `requirements.txt` file contains:
+
+    ```
+    google-generativeai
+    python-dotenv
+    pypdf
+    streamlit
+    ```
+
+    )
 
 4.  **Set up Google Gemini API Key:**
     - Go to [Google AI Studio](https://aistudio.google.com/) and obtain a new API key.
@@ -38,31 +49,32 @@ This project is a Minimum Viable Product (MVP) for an AI agent designed to assis
 
 ## Usage
 
-1.  **Place Judgment PDFs:**
-    Place your Indian Supreme Court judgment PDF files into the `judgments/` subfolder.
+1.  **Start the Web Application:**
+    Navigate to the project root directory (`legal_ai_mvp`) in your terminal and run:
 
-2.  **Run the Agent:**
+    ```bash
+    streamlit run app.py
+    ```
 
-    - **To process a specific judgment:**
+    This command will automatically open your web browser to the application (usually at `http://localhost:8501`).
 
-      ```bash
-      python app.py <your_judgment_filename.pdf>
-      ```
+2.  **Upload a Judgment:**
+    In the web interface, click the "Choose a PDF judgment file" button and select an Indian Supreme Court judgment PDF.
 
-      (e.g., `python app.py example_case.pdf`)
+3.  **Process and View:**
+    Click the "Process Judgment" button. The summary and key information will be displayed directly on the webpage.
 
-    - **To process all judgments in the `judgments/` folder:**
-      ```bash
-      python app.py
-      ```
-
-## Output
-
-Summaries and extracted key information will be saved as `.txt` files in the `output/` folder, named after the original PDF (e.g., `example_case_summary.txt`, `example_case_key_info.txt`).
+_(Optional: If you wish to use the previous Command-Line Interface (CLI) version, ensure you have renamed the file to `app_cli_version.py` and saved it. You can then run it from your terminal: `python app_cli_version.py <optional_judgment_filename.pdf>`. This version saves output to the `output/` folder.)_
 
 ## Future Enhancements (Beyond MVP)
 
-- [Think of 1-2 ideas, e.g., a simple web interface, integration with legal databases, more advanced NLP for specific legal entities]
+- **Deployment to Streamlit Community Cloud:** Making the application accessible online for easier sharing and use.
+- More sophisticated text chunking/summarization strategies for extremely long judgments.
+- Adding a feature to define specific legal terms found in the judgment.
+- Implementing user authentication and database to store processed judgments.
+- Cross-reference Similar Cases Enhancement: Suggest similar or cited judgments using embedding-based similarity (e.g., FAISS + sentence transformers). Benefit: Enables deeper legal research and case comparison.
+- Web or Plugin Integration Enhancement: Create a web app, VS Code plugin, or a browser extension where users can drag-and-drop PDFs. Benefit: Improves usability and real-world application.
+- OCR and Low-quality PDF Handling Enhancement: Use OCR (Tesseract or Amazon Textract) to extract text from scanned PDFs with tables or signatures. Benefit: Increases compatibility with court-uploaded or historic PDFs
 
 ## Contact
 
