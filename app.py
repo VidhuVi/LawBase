@@ -84,7 +84,7 @@ def generate_pdf_output(summary_text, key_info_markdown, judgment_file_name="jud
                 for wline in wrapped:
                     pdf.multi_cell(180, 6, wline.encode('latin-1', 'replace').decode('latin-1'))
 
-    pdf_output_str = pdf.output(dest='S').encode('latin1')
+    pdf_output_str = pdf.output(dest='S').decode('latin1')
     return pdf_output_str
 
 # --- Gemini API Function for Judgment Classification ---
