@@ -104,7 +104,7 @@ def summarize_judgment(text):
     6.  The final decision/holding.
     7.  Any important legal principles or statutes applied.
 
-    Keep the summary clear, educational, and no longer than 250-275 words.
+    Keep the summary clear, educational, and no longer than 150-200 words.
 
     Judgment Text:
     {text}
@@ -147,7 +147,7 @@ def extract_key_info(text):
     [List the names of the judges who authored or concurred with the judgment]
 
     **Facts:**
-    [Summarize the most relevant facts that led to the legal dispute, concise, around 40-60 words]. 
+    [Summarize the most relevant facts that led to the legal dispute, concise, around 40-50 words]. 
     **Explicitly identify and label any direct evidence (e.g., eyewitness testimony, documents), circumstantial evidence (e.g., motive, opportunity, forensic clues) and other types of evidence (e.g., expert testimony, physical evidence), if present and relevant.**
 
     **Jurisdictional Basis**
@@ -165,6 +165,8 @@ def extract_key_info(text):
     **Relevant Statutes/Principles:**
     [List any specific Indian Acts, Sections, or established legal principles cited or discussed]
 
+    **Practical Implications:** [State the real-world consequences or significance of this judgment for future cases, legal practice, or the interpretation of law, concise, around 30 words. If it sets a new precedent or significantly clarifies an existing one, state that.]
+    
     Judgment Text:
     {text}
     """
