@@ -147,7 +147,8 @@ def extract_key_info(text):
     [List the names of the judges who authored or concurred with the judgment]
 
     **Facts:**
-    [Summarize the most relevant facts that led to the legal dispute, concise, around 40-60 words]. **Explicitly identify and label any direct evidence (e.g., eyewitness testimony, documents), circumstantial evidence (e.g., motive, opportunity, forensic clues) and other types of evidence (e.g., expert testimony, physical evidence), if present and relevant.**
+    [Summarize the most relevant facts that led to the legal dispute, concise, around 40-60 words]. 
+    **Explicitly identify and label any direct evidence (e.g., eyewitness testimony, documents), circumstantial evidence (e.g., motive, opportunity, forensic clues) and other types of evidence (e.g., expert testimony, physical evidence), if present and relevant.**
 
     **Jurisdictional Basis**
     [State the specific legal provision or source of power that allows the court to hear the case such as articles/sections of the Constitution, specific statutes, etc.]
@@ -174,6 +175,26 @@ def extract_key_info(text):
     except Exception as e:
         return f"Error extracting key info: {e}"
 
+# --- Text Chunking Function ---
+def chunk_text(text, chunk_size=10000, chunk_overlap=1000):
+    """
+    Splits text into smaller chunks with overlap.
+    Aims for chunks around chunk_size characters.
+    """
+    chunks = []
+    start_index = 0
+    while start_index < len(text):
+        end_index = min(start_index + chunk_size, len(text))
+        chunk = text[start_index:end_index]
+        chunks.append(chunk)
+        if end_index == len(text):
+            break
+        start_index += (chunk_size - chunk_overlap)
+        # Ensure we don't start negative
+        if start_index < 0:
+            start_index = 0
+    return chunks
+
 
 # --- Streamlit UI Layout ---
 st.set_page_config(page_title="Legal AI Agent (MVP)", layout="centered")
@@ -182,7 +203,6 @@ st.title("⚖️ Legal AI Agent for Indian Law Students (MVP)")
 st.markdown("Upload an Indian Supreme Court judgment PDF to get a summary and key case information.")
 
 uploaded_file = st.file_uploader("Choose a PDF judgment file", type="pdf")
-
 
 if uploaded_file is not None:
     file_details = {"FileName": uploaded_file.name, "FileType": uploaded_file.type, "FileSize": uploaded_file.size}
@@ -200,25 +220,85 @@ if uploaded_file is not None:
             if not is_judgment:
                 st.error("This document does not appear to be an official judgment from the Supreme Court of India. Please upload a valid judgment PDF.")
                 st.stop() # Stop further processing if it's not a judgment
-            
-            # --- Continue with existing processing ONLY if it is a judgment ---
+
+            # --- MODIFIED Chunking Logic for Head-and-Tail Analysis ---
+            all_chunks = chunk_text(extracted_text, chunk_size=10000, chunk_overlap=1000)
+
+            # Define the strategy for selecting chunks
+            MAX_CHUNKS_FOR_DEEPER_ANALYSIS = 20  # Overall limit for AI context (approx 200,000 chars)
+            CHUNKS_FROM_START = 14               # How many chunks from the beginning
+            CHUNKS_FROM_END = 6                  # How many chunks from the end
+
+            # Ensure the sum of start and end chunks does not exceed the max allowed
+            # This is a safety check and ensures logic works even if you change values later
+            if (CHUNKS_FROM_START + CHUNKS_FROM_END) > MAX_CHUNKS_FOR_DEEPER_ANALYSIS:
+                # Adjust CHUNKS_FROM_END if sum is too high, or rebalance as needed
+                CHUNKS_FROM_END = MAX_CHUNKS_FOR_DEEPER_ANALYSIS - CHUNKS_FROM_START
+                if CHUNKS_FROM_END < 0: CHUNKS_FROM_END = 0 # Ensure it's not negative
+
+            processed_text_for_ai_parts = []
+            description_for_warning = ""
+            total_selected_chunks_count = 0
+
+            if len(all_chunks) <= MAX_CHUNKS_FOR_DEEPER_ANALYSIS:
+                # If the document is short enough to process fully (within our max limit)
+                processed_text_for_ai_parts.extend(all_chunks)
+                description_for_warning = f"completely in {len(all_chunks)} sections."
+                total_selected_chunks_count = len(all_chunks)
+            else:
+                # Select chunks from the beginning
+                head_chunks = all_chunks[:CHUNKS_FROM_START]
+                processed_text_for_ai_parts.extend(head_chunks)
+                
+                # Select chunks from the end, ensuring no overlap with head_chunks
+                # and not exceeding the total allowed chunks after taking from start.
+                # The starting index for tail chunks should be after the head chunks.
+                
+                # Calculate how many tail chunks we *can* take without overlap AND staying within max_chunks
+                actual_tail_chunks_to_take = min(CHUNKS_FROM_END, len(all_chunks) - CHUNKS_FROM_START)
+                
+                if actual_tail_chunks_to_take > 0:
+                    tail_chunks = all_chunks[len(all_chunks) - actual_tail_chunks_to_take:]
+                    # Ensure no exact duplicates if overlap occurs in very short documents,
+                    # though with head_chunks_count and tail_chunks_count, this is minimized.
+                    # For simplicity, if actual_tail_chunks_to_take starts *before* head_chunks end, it's better to concatenate distinct parts.
+                    # This simple extend might have minor overlap if CHUNKS_FROM_START + CHUNKS_FROM_END > len(all_chunks) but handled by overall len(all_chunks) check.
+                    
+                    # More robust way to add tail chunks avoiding overlap:
+                    # Find the starting index for tail chunks ensuring it's not within the head chunks
+                    tail_start_idx = max(CHUNKS_FROM_START, len(all_chunks) - actual_tail_chunks_to_take)
+                    processed_text_for_ai_parts.extend(all_chunks[tail_start_idx:])
+                    
+                    description_for_warning = (f"the first {len(head_chunks)} and last {actual_tail_chunks_to_take} sections.")
+                else:
+                    description_for_warning = (f"only the first {len(head_chunks)} sections.")
+                
+                total_selected_chunks_count = len(processed_text_for_ai_parts)
+
+
+            processed_text_for_ai = "".join(processed_text_for_ai_parts)
+
+
+            # --- Updated Warning/Info Messages ---
+            if len(all_chunks) > total_selected_chunks_count: # This means we skipped middle parts
+                st.warning(f"**Note:** This judgment is very long ({len(extracted_text):,} characters). "
+                           f"The AI is processing **{description_for_warning}** " # Use the new description
+                           f"({len(processed_text_for_ai):,} characters) for deep analysis. "
+                           "The middle sections of the judgment are not included to optimize for API limits and focus on key parts (head & tail).")
+            elif len(extracted_text) > 10000: # If it's more than one chunk but all fit (and processed completely by earlier logic)
+                st.info(f"The judgment ({len(extracted_text):,} characters) was processed in {len(all_chunks)} sections for comprehensive analysis.")
+            else: # For shorter judgments processed completely (single chunk)
+                st.info(f"The judgment ({len(extracted_text):,} characters) was processed completely.")
+
+
+            # --- Continue with existing processing using `processed_text_for_ai` ---
             with st.spinner("Analyzing judgment and generating output... This may take a moment."):
-                full_text_length = len(extracted_text)
-                processed_text_length = 40000 # Your defined limit
-
-                processed_text = extracted_text[:processed_text_length]
-
-                if full_text_length > processed_text_length:
-                    st.warning(f"**Note:** The judgment is very long ({full_text_length} characters). "
-                               f"Only the first {processed_text_length} characters are being processed to fit API limits. "
-                               "Some information from the latter parts of the judgment may be missed.")
-
                 st.subheader("Summary")
-                summary = summarize_judgment(processed_text)
+                summary = summarize_judgment(processed_text_for_ai) # Use processed_text_for_ai
                 st.write(summary)
 
                 st.subheader("Key Information")
-                key_info = extract_key_info(processed_text)
+                key_info = extract_key_info(processed_text_for_ai) # Use processed_text_for_ai
                 st.markdown(key_info)
 
         else:
