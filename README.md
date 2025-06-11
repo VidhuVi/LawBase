@@ -1,90 +1,120 @@
-# Legal AI Agent MVP for Indian Law Students
+# ⚖️ Legal AI Agent for Indian Law Students (MVP)
 
-## Project Overview
+This project is an MVP (Minimum Viable Product) of a Legal AI Agent designed to assist Indian law students in quickly understanding and extracting key information from Supreme Court of India judgments. It leverages Google's Gemini AI to provide summaries and structured insights, making complex legal documents more accessible.
 
-This project is a Minimum Viable Product (MVP) for an AI agent designed to assist Indian law students in their legal research and case analysis. It automates the process of extracting text from PDF judgments, summarizing them, and pulling out key information for case briefing, presented through a simple web interface.
+## ✨ Features
 
-## Live Demo (Deployed Application)
+* **PDF Text Extraction:** Extracts searchable text from uploaded PDF judgments.
+* **Judgment Validation:** Verifies if the uploaded PDF is likely an official Supreme Court of India judgment using AI.
+* **Intelligent Document Chunking:** Handles long judgments by intelligently chunking the text (head and tail analysis) to optimize for AI API limits while preserving crucial information.
+* **AI-Powered Summarization:** Generates a concise summary of the judgment's key aspects (overview, facts, legal issues, reasoning, decision, principles) tailored for law students.
+* **Structured Key Information Extraction:** Extracts critical details such as Case Name, Citation, Court & Date, Judges, Facts (with evidence types), Jurisdictional Basis, Issue(s), Holding, Reasoning (Ratio Decidendi), Relevant Statutes/Principles, and Practical Implications.
+* **PDF Analysis Download:** Allows users to download the generated summary and key information as a well-formatted PDF document using the ReportLab library, ensuring readability and proper text wrapping.
+* **User-Friendly Interface:** Built with Streamlit for an intuitive web application experience.
 
-You can access and interact with the deployed version of this Legal AI Agent here:
+## 🚀 Getting Started
 
-**[https://law-sahayi.streamlit.app/]**
+Follow these steps to set up and run the Legal AI Agent locally.
 
-## NOTE
-This application runs on Streamlit Community Cloud and uses a free api key, don't abuse it. The Google Gemini API key is securely handled as a Streamlit secret and is not exposed in the public codebase.
+### Prerequisites
 
-## Features
+* Python 3.8+
+* `pip` (Python package installer)
 
-- **PDF Text Extraction:** Extracts searchable text from uploaded Indian Supreme Court judgment PDFs.
-- **Judgment Summarization:** Generates concise, educational summaries tailored for law students, focusing on facts, issues, reasoning (ratio decidendi), and decisions.
-- **Key Information Extraction:** Extracts structured data points like Case Name, Citation, Judges, Facts, Issue(s), Holding, Reasoning, and Relevant Statutes/Principles.
-- **Web User Interface (UI):** A user-friendly interface built with Streamlit allows for easy file uploads and direct display of processed results.
-- **Robustness:** Includes basic handling for potentially very long judgments by processing a truncated portion and notifying the user.
+### Installation
 
-## Setup and Installation
-
-1.  **Clone/Download the Project:**
-    [Instructions on how to get your code, e.g., if it's in a Git repository or just copy the folder]
-
-2.  **Install Python:**
-    Ensure you have Python 3.9+ installed. Download from [python.org](https://www.python.org/downloads/).
-
-3.  **Install Required Libraries:**
-    Navigate to the project root directory (`legal_ai_mvp`) in your terminal and run:
-
+1.  **Clone the repository (if applicable):**
     ```bash
-    pip install -r requirements.txt
+    git clone <your-repo-url>
+    cd legal_ai_mvp
+    ```
+    (If not using Git, simply create a project folder and place `app.py`, `requirements.txt`, and `.env` inside it.)
+
+2.  **Create a Virtual Environment (Recommended):**
+    ```bash
+    python -m venv venv
     ```
 
-    (Make sure your `requirements.txt` file contains:
+3.  **Activate the Virtual Environment:**
+    * **Windows:**
+        ```bash
+        .\venv\Scripts\activate
+        ```
+    * **macOS/Linux:**
+        ```bash
+        source venv/bin/activate
+        ```
 
+4.  **Install Dependencies:**
+    The project relies on a `requirements.txt` file. Make sure it contains:
     ```
     google-generativeai
     python-dotenv
     pypdf
     streamlit
+    reportlab # For PDF generation
+    ```
+    Install them using pip:
+    ```bash
+    pip install -r requirements.txt
     ```
 
-    )
+### Google Gemini API Setup
 
-4.  **Set up Google Gemini API Key:**
-    - Go to [Google AI Studio](https://aistudio.google.com/) and obtain a new API key.
-    - In your `legal_ai_mvp` folder, create a file named `.env`.
-    - Add your API key to this file in the following format:
-      ```
-      GEMINI_API_KEY="YOUR_ACTUAL_GEMINI_API_KEY_HERE"
-      ```
-    - **Important:** Ensure you have a `.gitignore` file with `.env` in it to prevent accidentally sharing your key.
+1.  **Get an API Key:**
+    * Go to the [Google AI Studio](https://aistudio.google.com/app/apikey) and create a new API key for the Gemini API.
 
-## Usage
+2.  **Create a `.env` file:**
+    In the root directory of your project (where `app.py` is located), create a file named `.env` and add your API key:
+    ```
+    GOOGLE_API_KEY="YOUR_API_KEY_HERE"
+    ```
+    **Replace `"YOUR_API_KEY_HERE"` with the actual API key you obtained.**
 
-1.  **Start the Web Application:**
-    Navigate to the project root directory (`legal_ai_mvp`) in your terminal and run:
+### Running the Application
 
+1.  **Ensure your virtual environment is activated.**
+2.  **Run the Streamlit app:**
     ```bash
     streamlit run app.py
     ```
 
-    This command will automatically open your web browser to the application (usually at `http://localhost:8501`).
+3.  **Access the Application:**
+    Your default web browser should automatically open the Streamlit application. If not, open your browser and go to `http://localhost:8501`.
 
-2.  **Upload a Judgment:**
-    In the web interface, click the "Choose a PDF judgment file" button and select an Indian Supreme Court judgment PDF.
+## 🔗 Deployed Application
 
-3.  **Process and View:**
-    Click the "Process Judgment" button. The summary and key information will be displayed directly on the webpage.
+You can access and use the deployed version of this Legal AI Agent directly in your web browser.
 
-_(Optional: If you wish to use the previous Command-Line Interface (CLI) version, ensure you have renamed the file to `app_cli_version.py` and saved it. You can then run it from your terminal: `python app_cli_version.py <optional_judgment_filename.pdf>`. This version saves output to the `output/` folder.)_
+**[Click here to open the deployed app!](https://law-sahayi.streamlit.app/)**
 
-## Future Enhancements (Beyond MVP)
+**Note:** The performance and availability of the deployed app depend on the Streamlit Community Cloud (or your chosen hosting platform).
 
-- More sophisticated text chunking/summarization strategies for extremely long judgments.
-- Adding a feature to define specific legal terms found in the judgment.
-- Implementing user authentication and database to store processed judgments.
-- Cross-reference Similar Cases Enhancement: Suggest similar or cited judgments using embedding-based similarity (e.g., FAISS + sentence transformers). Benefit: Enables deeper legal research and case comparison.
-- Web or Plugin Integration Enhancement: Create a web app, VS Code plugin, or a browser extension where users can drag-and-drop PDFs. Benefit: Improves usability and real-world application.
-- OCR and Low-quality PDF Handling Enhancement: Use OCR (Tesseract or Amazon Textract) to extract text from scanned PDFs with tables or signatures. Benefit: Increases compatibility with court-uploaded or historic PDFs
+## 📚 How to Use
 
-## Contact
+1.  **Upload a PDF:** Click the "Choose a PDF judgment file" button and select an Indian Supreme Court judgment in PDF format.
+2.  **Process Judgment:** Click the "Process Judgment" button.
+    * The app will first extract text and verify if it's an Indian Supreme Court judgment.
+    * It will then use Google Gemini AI to summarize and extract key information.
+    * For very long documents, it applies intelligent chunking to focus on relevant sections (head and tail).
+3.  **View Analysis:** The summary and key information will be displayed directly in the web application.
+4.  **Download PDF:** A "Download Analysis as PDF" button will appear, allowing you to save the generated content as a formatted PDF document.
 
-Vidhu P Vinod
-vidhupvinod@gmail.com
+## 🛠️ Technologies Used
+
+* **Python:** Programming Language
+* **Streamlit:** Web Application Framework
+* **Google Gemini API:** For AI-powered summarization and information extraction
+* **PyPDF2 (or pypdf):** For PDF text extraction
+* **ReportLab:** For generating formatted PDF analysis documents
+* **Python-Dotenv:** For managing environment variables (API keys)
+
+## 🚧 Future Enhancements (Potential)
+
+* **OCR Integration:** Implement OCR functionality for handling scanned (image-based) PDF judgments.
+* **Direct Question Answering:** Allow users to ask specific questions about the judgment.
+* **Citation Links:** Link extracted citations to legal databases (e.g., Indian Kanoon).
+* **Precedent Analysis:** Identify and potentially categorize precedents set or followed.
+* **User Authentication:** Secure access for multiple users.
+
+---
