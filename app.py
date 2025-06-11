@@ -1,3 +1,4 @@
+import textwrap
 import streamlit as st #import for Streamlit
 import google.generativeai as genai
 import os
@@ -43,9 +44,6 @@ def extract_text_from_pdf(uploaded_file):
 
 # --- PDF Generation Function ---
 def generate_pdf_output(summary_text, key_info_markdown, judgment_file_name="judgment_analysis"):
-    """
-    Generates a PDF from the summary and key information.
-    """
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
@@ -55,13 +53,17 @@ def generate_pdf_output(summary_text, key_info_markdown, judgment_file_name="jud
     pdf.cell(0, 10, "Legal Judgment Analysis", ln=True, align="C")
     pdf.set_font("Arial", "B", 12)
     pdf.cell(0, 10, f"Analysis for: {judgment_file_name.replace('.pdf', '')}", ln=True, align="C")
-    pdf.ln(10) # Line break
+    pdf.ln(10)  # Line break
 
     # Summary Section
     pdf.set_font("Arial", "B", 12)
     pdf.cell(0, 10, "Summary", ln=True, align="L")
     pdf.set_font("Arial", "", 10)
-    pdf.multi_cell(0, 6, summary_text.encode('latin-1', 'replace').decode('latin-1')) # Encode/decode for fpdf compatibility
+
+    for line in summary_text.split('\n'):
+        wrapped = textwrap.wrap(line, width=100)
+        for wline in wrapped:
+            pdf.multi_cell(180, 6, wline.encode('latin-1', 'replace').decode('latin-1'))
     pdf.ln(5)
 
     # Key Information Section
@@ -69,18 +71,20 @@ def generate_pdf_output(summary_text, key_info_markdown, judgment_file_name="jud
     pdf.cell(0, 10, "Key Information", ln=True, align="L")
     pdf.set_font("Arial", "", 10)
 
-    # Process key_info_markdown line by line to handle bolding and newlines
     lines = key_info_markdown.split('\n')
     for line in lines:
-        if line.strip(): # Skip empty lines
+        if line.strip():
+            wrapped = textwrap.wrap(line, width=100)
             if line.startswith('**') and line.endswith('**'):
-                # Handle bold headings (like Case Name:, Citation:, etc.)
                 pdf.set_font("Arial", "B", 10)
-                pdf.multi_cell(0, 6, line.replace('**', '').encode('latin-1', 'replace').decode('latin-1'))
-                pdf.set_font("Arial", "", 10) # Reset to regular font
+                for wline in wrapped:
+                    pdf.multi_cell(180, 6, wline.replace('**', '').encode('latin-1', 'replace').decode('latin-1'))
+                pdf.set_font("Arial", "", 10)
             else:
-                pdf.multi_cell(0, 6, line.encode('latin-1', 'replace').decode('latin-1'))
-    pdf_output_str = pdf.output(dest='S').encode('latin1')  # encode to bytes
+                for wline in wrapped:
+                    pdf.multi_cell(180, 6, wline.encode('latin-1', 'replace').decode('latin-1'))
+
+    pdf_output_str = pdf.output(dest='S').encode('latin1')
     return pdf_output_str
 
 # --- Gemini API Function for Judgment Classification ---
