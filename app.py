@@ -1,11 +1,13 @@
-import textwrap
-import streamlit as st #import for Streamlit
+import streamlit as st 
 import google.generativeai as genai
 import os
-import io #for handling file content in memory
+import io
 from dotenv import load_dotenv
 from pypdf import PdfReader
-from fpdf import FPDF #import for PDF handling
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
 
 # --- Configuration ---
 load_dotenv()
@@ -42,50 +44,111 @@ def extract_text_from_pdf(uploaded_file):
         text = "" # Return empty string on error
     return text
 
-# --- PDF Generation Function ---
 def generate_pdf_output(summary_text, key_info_markdown, judgment_file_name="judgment_analysis"):
-    pdf = FPDF()
-    pdf.set_auto_page_break(auto=True, margin=15)
-    pdf.add_page()
-
-    # Set font for title
-    pdf.set_font("Arial", "B", 16)
-    pdf.cell(0, 10, "Legal Judgment Analysis", ln=True, align="C")
-    pdf.set_font("Arial", "B", 12)
-    pdf.cell(0, 10, f"Analysis for: {judgment_file_name.replace('.pdf', '')}", ln=True, align="C")
-    pdf.ln(10)  # Line break
-
+    """
+    Generate PDF using ReportLab - much more reliable than FPDF for text handling
+    """
+    # Create a BytesIO buffer
+    buffer = io.BytesIO()
+    
+    # Create the PDF document
+    doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.75*inch)
+    
+    # Get styles
+    styles = getSampleStyleSheet()
+    
+    # Create custom styles
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        alignment=1,  # Center alignment
+        spaceAfter=20
+    )
+    
+    subtitle_style = ParagraphStyle(
+        'CustomSubtitle',
+        parent=styles['Heading2'],
+        fontSize=12,
+        alignment=1,  # Center alignment
+        spaceAfter=30
+    )
+    
+    section_header_style = ParagraphStyle(
+        'SectionHeader',
+        parent=styles['Heading2'],
+        fontSize=12,
+        spaceAfter=10
+    )
+    
+    normal_style = ParagraphStyle(
+        'CustomNormal',
+        parent=styles['Normal'],
+        fontSize=10,
+        spaceAfter=6,
+        leftIndent=0,
+        rightIndent=0
+    )
+    
+    bold_style = ParagraphStyle(
+        'CustomBold',
+        parent=styles['Normal'],
+        fontSize=10,
+        spaceAfter=6,
+        fontName='Helvetica-Bold'
+    )
+    
+    # Build the document content
+    content = []
+    
+    # Title
+    content.append(Paragraph("Legal Judgment Analysis", title_style))
+    
+    # Subtitle
+    safe_filename = judgment_file_name.replace('.pdf', '')
+    content.append(Paragraph(f"Analysis for: {safe_filename}", subtitle_style))
+    
     # Summary Section
-    pdf.set_font("Arial", "B", 12)
-    pdf.cell(0, 10, "Summary", ln=True, align="L")
-    pdf.set_font("Arial", "", 10)
-
-    for line in summary_text.split('\n'):
-        wrapped = textwrap.wrap(line, width=100)
-        for wline in wrapped:
-            pdf.multi_cell(180, 6, wline.encode('latin-1', 'replace').decode('latin-1'))
-    pdf.ln(5)
-
+    content.append(Paragraph("Summary", section_header_style))
+    
+    if summary_text:
+        # Split summary into paragraphs and add each one
+        for paragraph in summary_text.split('\n'):
+            if paragraph.strip():
+                content.append(Paragraph(paragraph.strip(), normal_style))
+    
+    content.append(Spacer(1, 20))
+    
     # Key Information Section
-    pdf.set_font("Arial", "B", 12)
-    pdf.cell(0, 10, "Key Information", ln=True, align="L")
-    pdf.set_font("Arial", "", 10)
-
-    lines = key_info_markdown.split('\n')
-    for line in lines:
-        if line.strip():
-            wrapped = textwrap.wrap(line, width=100)
-            if line.startswith('**') and line.endswith('**'):
-                pdf.set_font("Arial", "B", 10)
-                for wline in wrapped:
-                    pdf.multi_cell(180, 6, wline.replace('**', '').encode('latin-1', 'replace').decode('latin-1'))
-                pdf.set_font("Arial", "", 10)
-            else:
-                for wline in wrapped:
-                    pdf.multi_cell(180, 6, wline.encode('latin-1', 'replace').decode('latin-1'))
-
-    pdf_output_str = pdf.output(dest='S').decode('latin1')
-    return pdf_output_str
+    content.append(Paragraph("Key Information", section_header_style))
+    
+    if key_info_markdown:
+        lines = key_info_markdown.split('\n')
+        for line in lines:
+            if line.strip():
+                # Handle bold headers
+                if line.startswith('**') and line.endswith('**'):
+                    # Remove ** and add as bold
+                    header_text = line.replace('**', '').strip()
+                    content.append(Paragraph(header_text, bold_style))
+                elif '**' in line and line.strip().endswith(':'):
+                    # Handle headers with ** formatting
+                    header_text = line.replace('**', '').strip()
+                    content.append(Paragraph(header_text, bold_style))
+                else:
+                    # Regular text - remove any remaining markdown
+                    clean_text = line.replace('**', '').replace('*', '').strip()
+                    if clean_text:
+                        content.append(Paragraph(clean_text, normal_style))
+    
+    # Build the PDF
+    doc.build(content)
+    
+    # Get the PDF bytes
+    pdf_bytes = buffer.getvalue()
+    buffer.close()
+    
+    return pdf_bytes
 
 # --- Gemini API Function for Judgment Classification ---
 def is_indian_supreme_court_judgment(text):
@@ -339,41 +402,30 @@ if uploaded_file is not None:
             else: # For shorter judgments processed completely (single chunk)
                 st.info(f"The judgment ({len(extracted_text):,} characters) was processed completely.")
 
-
-            # --- Continue with existing processing using `processed_text_for_ai` ---
             with st.spinner("Analyzing judgment and generating output... This may take a moment."):
                 st.subheader("Summary")
-                summary = summarize_judgment(processed_text_for_ai) # Use processed_text_for_ai
+                summary = summarize_judgment(processed_text_for_ai)
                 st.write(summary)
 
                 st.subheader("Key Information")
-                key_info = extract_key_info(processed_text_for_ai) # Use processed_text_for_ai
+                key_info = extract_key_info(processed_text_for_ai)
                 st.markdown(key_info)
 
-                # --- CORRECTED: Generate PDF bytes *after* AI processing and store in session_state ---
-
+                # Generate PDF bytes correctly
                 download_file_name = uploaded_file.name.replace('.pdf', '_analysis.pdf')
-
-                # Only generate the PDF bytes once, right after the AI processing is complete.
-                # This ensures it's "on-demand" in the sense that it's not generated until
-                # a judgment has been successfully processed by the AI.
+                
+                # Generate PDF bytes (now returns bytes directly)
                 pdf_bytes_for_download = generate_pdf_output(summary, key_info, uploaded_file.name)
-
-                # Store the generated bytes and desired file name in session state.
-                # This makes them persist across Streamlit reruns.
+                
+                # Store in session state
                 st.session_state['download_pdf_bytes'] = pdf_bytes_for_download
                 st.session_state['download_file_name'] = download_file_name
 
-            # --- Render the download button AFTER processing ---
-            # It will retrieve the data from session_state.
-            # This button will now appear only after a successful judgment processing.
+            # Download button
             if 'download_pdf_bytes' in st.session_state:
                 st.download_button(
                     label="Download Analysis as PDF",
-                    data=st.session_state['download_pdf_bytes'], # Access the pre-generated bytes
+                    data=st.session_state['download_pdf_bytes'],
                     file_name=st.session_state['download_file_name'],
                     mime="application/pdf"
                 )
-
-        else:
-            st.error("Could not extract text from the PDF. Please try another file.")

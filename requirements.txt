@@ -2,4 +2,4 @@ google-generativeai
 python-dotenv
 pypdf
 streamlit
-fpdf2
+reportlab
